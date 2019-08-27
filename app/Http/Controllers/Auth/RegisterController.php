@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
@@ -72,9 +74,31 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $this->validator($request->all())->validate();
-    
+        $validator = Validator::make($request->all(), [
+            "name" => "required",
+            "email" => "required",
+            "password"  => "required",
+        ]);        
+
+        $response = [
+            'response' => ['code' => 404, 'message' => 'Initial error'],
+        ];
+
+        if ($validator->fails()) {
+            $response['response']['code'] = 422;
+            $response['response']['message'] = $validator->errors();
+            return response()->json($response, 422);
+        }        
+
+        $checkUserExisting = User::where('email', $request->input('email'))->first();
+        if($checkUserExisting) {
+            $response['response']['code'] = 400;
+            $response['response']['message'] = 'Email has been existing';
+            return response()->json($response, 400);
+        }
+        
         event(new Registered($user = $this->create($request->all())));    
+        
         $this->guard()->login($user);
         return $this->registered($request, $user)
                         ?: redirect($this->redirectPath());
@@ -83,6 +107,12 @@ class RegisterController extends Controller
     protected function registered(Request $request, $user)
     {
         $user->generateToken();    
-        return response()->json(['data' => $user->toArray()], 201);
+
+        $response = [
+            'response' => ['code' => 200, 'message' => 'Registrasi success'],
+            'data' => $user->toArray()
+        ];
+
+        return response()->json($response, 200);
     }    
 }
