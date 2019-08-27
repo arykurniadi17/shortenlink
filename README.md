@@ -8,7 +8,7 @@ create example simple shortenlink laravel
 5.  run php artisan config:clear
 6.  Create all schema table with php artisan migrate
 7.  Generate startup data register with run php artisan db:seed
-8.  Finally access http://localhost:8080/
+8.  Finally access http://localhost:8080/{code}
 
 You can run unit testing basically 
 1.  Run composer test
