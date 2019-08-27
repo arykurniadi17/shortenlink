@@ -48,7 +48,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         $response = [
-            'response' => ['code' => 500, 'message' => 'Server error'],
+            'response' => ['code' => 500, 'message' => 'Something went wrong'],
         ];
         return response()->json($response, $response['response']['code']);
     }
